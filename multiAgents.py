@@ -12,6 +12,9 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+from hashlib import new
+from webbrowser import get
+
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -74,8 +77,29 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        score = successorGameState.getScore()
+        foodList = newFood.asList()
+        foodDistance = float('inf')
+        foodWeight = 1
+        ghostWeight = 1
+        ghostScore = 0
+        if foodList:
+            for food in foodList:
+                newDistance = util.manhattanDistance(newPos, food)
+                if foodDistance > newDistance:
+                    foodDistance = newDistance
+            score += (foodWeight) * 1/ (foodDistance + 1)
+            
+        for ghost in newGhostStates:    
+            ghostDistance = util.manhattanDistance(newPos,ghost.getPosition())
+            if ghost.scaredTimer > 0:
+                    ghostScore += 1/ (ghostDistance + 1)
+        
+            else: 
+                    ghostScore -= 1/ (ghostDistance + 1)
+        score += ghostWeight * ghostScore
+
+        return score
 
 def scoreEvaluationFunction(currentGameState: GameState):
     """
